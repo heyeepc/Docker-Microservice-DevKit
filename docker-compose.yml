@@ -1,36 +1,35 @@
 services:
+  # 1. 数据库服务（完全隔离在后端网络）
   my_db:
     image: mysql:8.0
     container_name: rpi_mysql
     environment:
       MYSQL_ROOT_PASSWORD: root_password
       MYSQL_DATABASE: test_db
-    ports:
-      - "3306:3306"
+    # ports: - "3306:3306"  #  删除了物理端口映射！隔绝外部攻击，仅允许内网容器互访
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
-      - infra_net
+      - backend_net
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot_password"]
       interval: 5s
       timeout: 5s
       retries: 5
 
+  # 2. 缓存服务（完全隔离在后端网络）
   my_redis:
     image: redis:7-alpine
     container_name: rpi_redis
-    ports:
-      - "6379:6379"
     networks:
-      - infra_net
+      - backend_net
 
-  # 你的 Python 核心服务
+  # 3. Python 核心网管服务（扮演堡垒机/网关角色，横跨两个网络）
   my_script_service:
     build: ./backend
     container_name: rpi_python_app
     ports:
-      - "8501:8501" # Streamlit 默认端口
+      - "8501:8501"
     environment:
       - SPRING_DATASOURCE_URL=my_db
       - SPRING_REDIS_HOST=my_redis
@@ -40,11 +39,15 @@ services:
       my_redis:
         condition: service_started
     networks:
-      - infra_net
+      - frontend_net  #  接入前端网，允许外部访问看板
+      - backend_net   #  接入后端网，用于和数据库通信
 
 volumes:
   mysql_data:
 
+#  显式定义两个隔离的网络平面
 networks:
-  infra_net:
+  frontend_net:
+    driver: bridge
+  backend_net:
     driver: bridge
