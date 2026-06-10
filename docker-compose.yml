@@ -1,0 +1,63 @@
+services:
+  # 1. 数据库服务
+  my_db:
+    image: mysql:8.0
+    container_name: rpi_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: test_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - infra_net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot_password"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. 缓存服务
+  my_redis:
+    image: redis:7-alpine
+    container_name: rpi_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - infra_net
+
+  # 3. 后端服务 ( 新增)
+  my_backend:
+    build: ./backend      # 告诉 Docker 去 ./backend 目录下找 Dockerfile 并在树莓派本地编译
+    container_name: rpi_backend
+    ports:
+      - "8080:8080"       # 映射后端端口
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://my_db:3306/test_db  #  注意：数据库IP直接写服务名 my_db
+      - SPRING_REDIS_HOST=my_redis                             #  Redis IP直接写服务名 my_redis
+    depends_on:
+      my_db:
+        condition: service_healthy    #  绝杀：只有当 MySQL 健康检查通过，才会开始编译并启动后端
+      my_redis:
+        condition: service_started
+    networks:
+      - infra_net
+
+  # 4. 前端服务 ( 新增)
+  my_frontend:
+    build: ./frontend     # 告诉 Docker 去 ./frontend 目录下找 Dockerfile
+    container_name: rpi_frontend
+    ports:
+      - "80:80"           # 映射前端 Nginx 端口到树莓派的 80 端口
+    depends_on:
+      - my_backend        # 后端起来了，前端再起来
+    networks:
+      - infra_net
+
+volumes:
+  mysql_data:
+
+networks:
+  infra_net:
+    driver: bridge
