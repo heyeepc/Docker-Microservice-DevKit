@@ -9,4 +9,4 @@
 └── backend/               # Python 后端监控服务
     ├── app.py             # Streamlit 核心脚本（数据采集与可视化看板）
     ├── requirements.txt   # 项目 Python 依赖包
-    └── Dockerfile         # 高水准多阶段构建 Dockerfile
+    └── Dockerfile         # 多阶段构建 Dockerfile
