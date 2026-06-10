@@ -16,7 +16,7 @@ try:
     r = redis.Redis(host=REDIS_HOST, port=6379, decode_responses=True)
     r.incr("page_views")
     views = r.get("page_views")
-    st.metric(label="📊 看板总访问次数（Redis 计数）", value=views)
+    st.metric(label=" 看板总访问次数（Redis 计数）", value=views)
 except Exception as e:
     st.error(f"Redis 连接失败: {e}")
 
