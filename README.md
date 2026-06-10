@@ -1,6 +1,8 @@
 # Docker-Microservice-DevKit
 基于 Docker 和 Docker-Compose 构建了微服务开发/测试一体化容器方案，实现多服务、多中间件的一键本地编排，彻底解决在我电脑上能运行，在服务器上不行的经典问题。
- 
+
+<img width="1276" height="668" alt="image" src="https://github.com/user-attachments/assets/43f2f278-d5cb-4759-a70f-19f7f1ed772c" />
+
 ## ⚙️ 核心组件与工程设计
 
 本项目不仅仅是一套监控脚本，而是围绕边缘端（树莓派5）特性，按照工业级标准打造的微服务一体化交付方案。各核心文件的功能与设计逻辑如下：
