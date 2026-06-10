@@ -52,7 +52,7 @@ try:
     data = cursor.fetchall()
     
     # 在前端渲染数据
-    st.subheader("🖥️ 树莓派当前状态（实时写入 MySQL）")
+    st.subheader(" 树莓派当前状态（实时写入 MySQL）")
     col1, col2 = st.columns(2)
     col1.metric("CPU 使用率", f"{cpu} %")
     col2.metric("内存使用率", f"{mem} %")
